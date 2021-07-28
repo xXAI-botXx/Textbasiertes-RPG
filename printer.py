@@ -2,6 +2,7 @@ import sys
 import os
 import time
 import random
+import winsound
 
 #XXX ANSI Escape Codes: XXX
 # Using ANSI Escape Codes and you need os.system("color") for windows
@@ -16,6 +17,7 @@ BLUE = '\033[94m'
 GREEN = '\033[92m'
 YELLOW = '\033[93m'
 RED = '\033[91m'
+
 # Background-Colors
 BACKGROUND_BLACK = "\u001b[40m"
 BACKGROUND_RED = "\u001b[41m"
@@ -39,11 +41,28 @@ DOWN = lambda n: f"\u001b[{n}B"
 RIGHT = lambda n: f"\u001b[{n}C"
 LEFT = lambda n: f"\u001b[{n}D"
 
+NEXT_LINE = lambda n: f"\u001b[{n}E" #moves cursor to beginning of line n lines down
+PREV_LINE = lambda n: f"\u001b[{n}F" #moves cursor to beginning of line n lines down
+
+SET_COLUMN = lambda n: f"\u001b[{n}G" #moves cursor to column n
+SET_POSITION = lambda n, m: f"\u001b[{n};{m}H" #moves cursor to row n column m
+
+
+# Clearing
+CLAER_SCREEN = lambda n: f"\u001b[{n}J" #clears the screen
+#    n=0 clears from cursor until end of screen,
+#    n=1 clears from cursor to beginning of screen
+#    n=2 clears entire screen
+CLEAR_LINE = lambda n: f"\u001b[{n}K" #clears the current line
+#    n=0 clears from cursor to end of line
+#    n=1 clears from cursor to start of line
+#    n=2 clears entire line
+
 # Reset
 END = '\033[0m'
 
-print_time = 0.5
-print_time_max = 6   
+print_time = 0.1
+print_time_max = 4   
 print_time_min = 0
 
 def print_with_delay(txt:str, *features) -> None:
@@ -55,9 +74,13 @@ def print_with_delay(txt:str, *features) -> None:
     for c in txt:
         sys.stdout.write(c)
         sys.stdout.flush()    # forces buffer to flush the txt (normally it collect all and take it out togheter)
+        if print_time_max > 0:
+            winsound.PlaySound("DATA/typing_1.wav", winsound.SND_ASYNC)
         #time.sleep(print_time)
         rnd = random.randint(print_time_min, print_time_max)
         time.sleep(rnd/10)
+        if print_time_max <= 0:
+            winsound.PlaySound("DATA/typing_1.wav", winsound.SND_ASYNC)
     sys.stdout.write("\n"+END)
     sys.stdout.flush()
 
@@ -68,9 +91,13 @@ def print_with_only_delay(txt:str, print_time_min=print_time_min, print_time_max
     for c in txt:
         sys.stdout.write(c)
         sys.stdout.flush()    # forces buffer to flush the txt (normally it collect all and take it out togheter)
+        if print_time_max > 0:
+            winsound.PlaySound("DATA/typing_1.wav", winsound.SND_ASYNC)
         #time.sleep(print_time)
         rnd = random.randint(print_time_min, print_time_max)
         time.sleep(rnd/10)
+        if print_time_max <= 0:
+            winsound.PlaySound("DATA/typing_1.wav", winsound.SND_ASYNC)
     
 def special_print(txt:str, *features) -> None:
     new_txt = txt
