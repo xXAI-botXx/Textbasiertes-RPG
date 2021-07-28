@@ -1,0 +1,170 @@
+import sys
+import os
+import time
+import random
+
+#XXX ANSI Escape Codes: XXX
+# Using ANSI Escape Codes and you need os.system("color") for windows
+
+# could save in dict
+# \033 und \u001b sollten das selbe sein
+# Colors
+PURPLE = '\033[95m'
+CYAN = '\033[96m'
+DARKCYAN = '\033[36m'
+BLUE = '\033[94m'
+GREEN = '\033[92m'
+YELLOW = '\033[93m'
+RED = '\033[91m'
+# Background-Colors
+BACKGROUND_BLACK = "\u001b[40m"
+BACKGROUND_RED = "\u001b[41m"
+BACKGROUND_GREEN = "\u001b[42m"
+BACKGROUND_YELLOW = "\u001b[43m"
+BACKGROUND_BLUE = "\u001b[44m"
+BACKGROUND_MAGENTA = "\u001b[45m"
+BACKGROUND_CYAN = "\u001b[46m"
+BACKGROUND_WHITE = "\u001b[47m"
+
+# Styles
+BOLD = '\033[1m'
+UNDERLINE = '\033[4m'
+REVERSED = "\u001b[7m"
+HEADER = "\033[95m"
+
+# Cursor Navigations -> functions!
+# move cursor in A/B/C/D Direction by n characters
+UP = lambda n: f"\u001b[{n}A"
+DOWN = lambda n: f"\u001b[{n}B"
+RIGHT = lambda n: f"\u001b[{n}C"
+LEFT = lambda n: f"\u001b[{n}D"
+
+# Reset
+END = '\033[0m'
+
+print_time = 0.5
+print_time_max = 6   
+print_time_min = 0
+
+def print_with_delay(txt:str, *features) -> None:
+    """Print something with delay on console"""
+    if len(features) > 0:
+        txt = add_special_effect(txt, features)
+    os.system("color")
+
+    for c in txt:
+        sys.stdout.write(c)
+        sys.stdout.flush()    # forces buffer to flush the txt (normally it collect all and take it out togheter)
+        #time.sleep(print_time)
+        rnd = random.randint(print_time_min, print_time_max)
+        time.sleep(rnd/10)
+    sys.stdout.write("\n"+END)
+    sys.stdout.flush()
+
+def print_with_only_delay(txt:str, print_time_min=print_time_min, print_time_max=print_time_max) -> None:
+    """Print something with delay on console"""
+    os.system("color")
+
+    for c in txt:
+        sys.stdout.write(c)
+        sys.stdout.flush()    # forces buffer to flush the txt (normally it collect all and take it out togheter)
+        #time.sleep(print_time)
+        rnd = random.randint(print_time_min, print_time_max)
+        time.sleep(rnd/10)
+    
+def special_print(txt:str, *features) -> None:
+    new_txt = txt
+    for i in features:
+        new_txt = i + new_txt + END
+    print_with_delay(new_txt)
+
+def print_bold(txt:str, *features) -> None:
+    if len(features) != 0:
+        new_txt = txt
+        for i in features:
+            new_txt = i + new_txt + END
+
+        print_with_delay(BOLD+new_txt+END)
+    else:
+        print_with_delay(BOLD+txt+END)
+
+def add_special_effect(txt:str, *features) -> str:    # You can add Special Effects by yourself or with this method
+    if type(features[0]) == tuple:
+        features = features[0]
+    new_txt = txt
+    for i in features:
+        new_txt = i + new_txt + END
+    return new_txt
+
+def colors():
+    for i in range(0, 16):
+        for j in range(0, 16):
+            code = str(i * 16 + j)
+            sys.stdout.write(f"\u001b[38;5;{code}m{code.ljust(4)}")
+        print(u"\u001b[0m")
+
+def get_color_code(number:int):
+    codes = []
+    for i in range(0, 16):
+        for j in range(0, 16):
+            code = str(i * 16 + j)
+            codes += [f"\u001b[38;5;{code}m"]
+    return codes[number]
+
+def background_colors():
+    for i in range(0, 16):
+        for j in range(0, 16):
+            code = str(i * 16 + j)
+            sys.stdout.write(f"\u001b[48;5;{code}m{code.ljust(4)}")
+        print(u"\u001b[0m")
+
+def get_background_color_code(number:int):
+    codes = []
+    for i in range(0, 16):
+        for j in range(0, 16):
+            code = str(i * 16 + j)
+            codes += [f"\u001b[48;5;{code}m"]
+    return codes[number]
+
+# Examples
+# Cursor Usage
+def loading_example():
+    for p in range(101):
+        sys.stdout.write(f"{LEFT(3)}{p}%")
+        sys.stdout.flush()
+        time.sleep(0.1)
+    sys.stdout.write("\n")
+    sys.stdout.flush()
+
+def menu_example():
+    print_with_only_delay(f"Menu:\n    -> New Game\n    -> Load Game\n    -> Exit\n")
+    while True:
+        user_input = input("User: ").lower()
+        if user_input == "exit":
+            print_with_only_delay(f"{UP(4)}    -> New Game\n    -> Load Game\n    {REVERSED}-> Exit{END}\n", 0, 0)
+            print_with_only_delay(LEFT(100) + " "*6+" "*len(user_input) + LEFT(100), 0, 0)
+            time.sleep(1)
+            print_with_only_delay("bye...")
+            print_with_only_delay(DOWN(1)+LEFT(10), 0, 0)
+            time.sleep(0.5)
+            break
+        elif user_input == "new game":
+            print_with_only_delay(f"{UP(4)}    {REVERSED}-> New Game{END}\n    -> Load Game{DOWN(2)}{LEFT(100)}", 0, 0)
+            print_with_only_delay(" "*6+" "*len(user_input)+LEFT(100), 0, 0)
+        elif user_input == "load game":
+            print_with_only_delay(f"{UP(4)}    -> New Game\n    {REVERSED}-> Load Game{END}{DOWN(2)}{LEFT(100)}", 0, 0)
+            print_with_only_delay(" "*6+" "*len(user_input)+LEFT(100), 0, 0)
+        else:
+            print_with_only_delay(UP(1)+" "*6+" "*len(user_input)+LEFT(100), 0, 0)
+
+
+if __name__ == "__main__":
+    testing = False
+    if testing == True:
+        print_with_delay("moin")
+        print_with_delay(f"moin {add_special_effect('red_bold', RED, BOLD)}")
+        print_with_delay(f"moin {add_special_effect('red', RED)}")
+        print_with_delay(f"{add_special_effect('reversed', REVERSED)}")
+        print_with_delay("header", HEADER)
+        print_with_delay("BACKGROUND_MAGENTA", BACKGROUND_MAGENTA)
+    menu_example()
