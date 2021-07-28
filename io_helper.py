@@ -3,6 +3,7 @@ import os
 import time
 import random
 import winsound
+import msvcrt
 
 #XXX ANSI Escape Codes: XXX
 # Using ANSI Escape Codes and you need os.system("color") for windows
@@ -61,6 +62,10 @@ CLEAR_LINE = lambda n: f"\u001b[{n}K" #clears the current line
 # Reset
 END = '\033[0m'
 
+sounds = ("DATA/typing_1.wav", "DATA/typing_3.wav", "DATA/typing_4.wav", "DATA/typing_5.wav", "DATA/typing_7.wav", "DATA/typing_8.wav", "DATA/typing_9.wav"
+            , "DATA/typing_15.wav", "DATA/typing_16.wav")
+
+# Output
 print_time = 0.1
 print_time_max = 4   
 print_time_min = 0
@@ -75,12 +80,15 @@ def print_with_delay(txt:str, *features) -> None:
         sys.stdout.write(c)
         sys.stdout.flush()    # forces buffer to flush the txt (normally it collect all and take it out togheter)
         if print_time_max > 0:
-            winsound.PlaySound("DATA/typing_1.wav", winsound.SND_ASYNC)
+            if c == "\n":
+                winsound.PlaySound(sounds[0], winsound.SND_ASYNC)
+            else:
+                winsound.PlaySound(sounds[random.randint(1, 8)], winsound.SND_ASYNC)
         #time.sleep(print_time)
         rnd = random.randint(print_time_min, print_time_max)
         time.sleep(rnd/10)
-        if print_time_max <= 0:
-            winsound.PlaySound("DATA/typing_1.wav", winsound.SND_ASYNC)
+    if print_time_max <= 0:
+        winsound.PlaySound(sounds[random.randint(1, 8)], winsound.SND_ASYNC)
     sys.stdout.write("\n"+END)
     sys.stdout.flush()
 
@@ -92,12 +100,30 @@ def print_with_only_delay(txt:str, print_time_min=print_time_min, print_time_max
         sys.stdout.write(c)
         sys.stdout.flush()    # forces buffer to flush the txt (normally it collect all and take it out togheter)
         if print_time_max > 0:
-            winsound.PlaySound("DATA/typing_1.wav", winsound.SND_ASYNC)
+            if c == "\n":
+                winsound.PlaySound(sounds[0], winsound.SND_ASYNC)
+            else:
+                winsound.PlaySound(sounds[random.randint(1, 8)], winsound.SND_ASYNC)
         #time.sleep(print_time)
         rnd = random.randint(print_time_min, print_time_max)
         time.sleep(rnd/10)
         if print_time_max <= 0:
-            winsound.PlaySound("DATA/typing_1.wav", winsound.SND_ASYNC)
+            if c == "\n":
+                winsound.PlaySound(sounds[0], winsound.SND_ASYNC)
+            else:
+                winsound.PlaySound(sounds[random.randint(1, 8)], winsound.SND_ASYNC)
+
+def print_char_with_only_delay(c:str, print_time_min=print_time_min, print_time_max=print_time_max) -> None:
+    """Print something with delay on console"""
+    os.system("color")
+
+    sys.stdout.write(c)
+    sys.stdout.flush()    # forces buffer to flush the txt (normally it collect all and take it out togheter)
+    if print_time_max > 0:
+        if c == "\n":
+                winsound.PlaySound(sounds[0], winsound.SND_ASYNC)
+        else:
+            winsound.PlaySound(sounds[random.randint(1, 8)], winsound.SND_ASYNC)
     
 def special_print(txt:str, *features) -> None:
     new_txt = txt
@@ -123,6 +149,29 @@ def add_special_effect(txt:str, *features) -> str:    # You can add Special Effe
         new_txt = i + new_txt + END
     return new_txt
 
+# Input
+def get_input() -> str:
+    user_input = ""
+    print_with_only_delay("User: ")
+    while True:
+        #user_input = sys.stdin.read(1)
+        #user_input = str(msvcrt.getch(), 'utf-8')
+        try:
+            char = msvcrt.getch().decode()
+            user_input += char
+        except UnicodeDecodeError:
+            return None
+        if char == "\n" or char == "\r":
+            print_char_with_only_delay("\n", 0, 0)
+            break
+        print_char_with_only_delay(HEADER+char+END)
+    return user_input.lower().replace("\r", "")
+
+def all_unicodes():
+    for i in range(0,1100):
+        print(i, chr(i))
+
+# Examples and more
 def colors():
     for i in range(0, 16):
         for j in range(0, 16):
@@ -153,7 +202,6 @@ def get_background_color_code(number:int):
             codes += [f"\u001b[48;5;{code}m"]
     return codes[number]
 
-# Examples
 # Cursor Usage
 def loading_example():
     for p in range(101):
@@ -194,4 +242,4 @@ if __name__ == "__main__":
         print_with_delay(f"{add_special_effect('reversed', REVERSED)}")
         print_with_delay("header", HEADER)
         print_with_delay("BACKGROUND_MAGENTA", BACKGROUND_MAGENTA)
-    menu_example()
+    #menu_example()
