@@ -88,7 +88,7 @@ def print_with_delay(txt:str, *features) -> None:
         rnd = random.randint(print_time_min, print_time_max)
         time.sleep(rnd/10)
     if print_time_max <= 0:
-        winsound.PlaySound(sounds[random.randint(1, 8)], winsound.SND_ASYNC)
+        winsound.PlaySound(sounds[random.randint(0, 8)], winsound.SND_ASYNC)
     sys.stdout.write("\n"+END)
     sys.stdout.flush()
 
@@ -107,11 +107,8 @@ def print_with_only_delay(txt:str, print_time_min=print_time_min, print_time_max
         #time.sleep(print_time)
         rnd = random.randint(print_time_min, print_time_max)
         time.sleep(rnd/10)
-        if print_time_max <= 0:
-            if c == "\n":
-                winsound.PlaySound(sounds[0], winsound.SND_ASYNC)
-            else:
-                winsound.PlaySound(sounds[random.randint(1, 8)], winsound.SND_ASYNC)
+    if print_time_max <= 0:
+        winsound.PlaySound(sounds[random.randint(0, 8)], winsound.SND_ASYNC)
 
 def print_char_with_only_delay(c:str, print_time_min=print_time_min, print_time_max=print_time_max) -> None:
     """Print something with delay on console"""
@@ -150,9 +147,9 @@ def add_special_effect(txt:str, *features) -> str:    # You can add Special Effe
     return new_txt
 
 # Input
-def get_input() -> str:
+def get_input(message="User: ") -> str:
     user_input = ""
-    print_with_only_delay("User: ")
+    print_with_only_delay(message)
     while True:
         #user_input = sys.stdin.read(1)
         #user_input = str(msvcrt.getch(), 'utf-8')
