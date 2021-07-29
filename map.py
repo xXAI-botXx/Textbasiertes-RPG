@@ -7,3 +7,6 @@ class Labyrinth(object):
 
     def create_labyrinth(self) -> list:
         pass
+
+    def update_pos(self, old_pos, new_pos):
+        pass

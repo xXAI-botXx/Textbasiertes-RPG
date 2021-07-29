@@ -14,10 +14,41 @@ class Player(object):
         self.inventory = inventory
         self.equipment = equipment
 
+        self.move_commands = {'schauen':self.look, 'rechts drehen':self.rotate_right, 'links drehen':self.rotate_left, 'inventar':self.open_inventory, 
+                              'angriff':self.attack, 'verteidigen':self.defend, 'ausrüstung':self.open_equipment, 'magie':self.open_magic}
+
     def get_move(self):
         # solange bis Spieler Zug mit Bewegungskosten tätigt
         while True:
             pass
+
+    def look(self):
+        pass
+
+    def rotate_right(self):
+        pass
+
+    def rotate_left(self):
+        pass
+
+    def open_inventory(self):
+        pass
+
+    def attack(self):
+        # Angriff mit der primären Waffe -> Das ist standard, weitere Angriffe sind im Inventarmenü und im magiemenü verfügbar
+        pass
+
+    def defend(self):
+        # Verteidigung mit Schild oder nichts
+        pass
+
+    # gibt es Ausrüstungsabteil, oder ist das im Inventar einfach eingebaut?
+    def open_equipment(self):
+        pass
+
+    def open_magic(self):
+        # wie erhält man Spells? -> durch Items -> Bücher oder durch Skillsystem? -> später klären
+        pass
 
     def level_up(self):
         pass
