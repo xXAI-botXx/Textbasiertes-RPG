@@ -50,7 +50,7 @@ SET_POSITION = lambda n, m: f"\u001b[{n};{m}H" #moves cursor to row n column m
 
 
 # Clearing
-CLAER_SCREEN = lambda n: f"\u001b[{n}J" #clears the screen
+CLEAR_SCREEN = lambda n: f"\u001b[{n}J" #clears the screen
 #    n=0 clears from cursor until end of screen,
 #    n=1 clears from cursor to beginning of screen
 #    n=2 clears entire screen
@@ -92,31 +92,31 @@ def print_with_delay(txt:str, *features) -> None:
     sys.stdout.write("\n"+END)
     sys.stdout.flush()
 
-def print_with_only_delay(txt:str, print_time_min=print_time_min, print_time_max=print_time_max) -> None:
+def print_with_only_delay(txt:str, min=print_time_min, max=print_time_max) -> None:
     """Print something with delay on console"""
     os.system("color")
 
     for c in txt:
         sys.stdout.write(c)
         sys.stdout.flush()    # forces buffer to flush the txt (normally it collect all and take it out togheter)
-        if print_time_max > 0:
+        if max > 0:
             if c == "\n":
                 winsound.PlaySound(sounds[0], winsound.SND_ASYNC)
             else:
                 winsound.PlaySound(sounds[random.randint(1, 8)], winsound.SND_ASYNC)
         #time.sleep(print_time)
-        rnd = random.randint(print_time_min, print_time_max)
+        rnd = random.randint(min, max)
         time.sleep(rnd/10)
-    if print_time_max <= 0:
-        winsound.PlaySound(sounds[random.randint(0, 8)], winsound.SND_ASYNC)
+    #if max <= 0:
+    #    winsound.PlaySound(sounds[random.randint(0, 8)], winsound.SND_ASYNC)
 
-def print_char_with_only_delay(c:str, print_time_min=print_time_min, print_time_max=print_time_max) -> None:
+def print_char_with_only_delay(c:str, min=print_time_min, max=print_time_max) -> None:
     """Print something with delay on console"""
     os.system("color")
 
     sys.stdout.write(c)
     sys.stdout.flush()    # forces buffer to flush the txt (normally it collect all and take it out togheter)
-    if print_time_max > 0:
+    if max > 0:
         if c == "\n":
                 winsound.PlaySound(sounds[0], winsound.SND_ASYNC)
         else:
