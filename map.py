@@ -19,7 +19,7 @@ class Maze(object):
     def create_map(self) -> list:
         self.map = dict()
         self.not_marked = []
-        self.visited = []
+        self.stack = []
         # komplett mit Wänden befüllt:
         for row in range(self.rows):
             for column in range(self.columns):
@@ -29,24 +29,25 @@ class Maze(object):
                 self.not_marked += [cur_cell]
         
     def create_maze(self, pos):
-        while True:
-            if len(self.not_marked) < 1:
-                break
-
+        while len(self.not_marked) >= 1:
             cur_cell = self.map[pos]
             cur_cell.visited = True
-            self.not_marked.remove(cur_cell)
-            self.visited += [cur_cell]
+            try:
+                self.not_marked.remove(cur_cell)
+            except ValueError:    # soll vorkommen
+                pass
 
             neighbors = self.get_non_visited_neighbors(pos)
             if len(neighbors) < 1:
-                other_neighbor = self.get_pos_with_not_marked_neighbor()
-                if other_neighbor == None:
-                    print("Upps here you shouldnt be...")
+                #other_neighbor = self.get_pos_with_not_marked_neighbor()
+                if len(self.stack) > 0:
+                    pos = self.stack.pop(-1)
+                else:
+                    print("###########################UPPS###########################")
                     break
-                #self.create_maze(other_neighbor)
-                pos = other_neighbor
             else:
+                if len(neighbors) > 1:
+                    self.stack += [cur_cell.get_pos()]
                 neighbor = random.choices(neighbors, k=1)
                 cur_cell.remove(neighbor[0][1])
                 self.map[neighbor[0][0]].remove_opposite(neighbor[0][1])
@@ -147,27 +148,9 @@ class Maze(object):
                 neighbors += [[(pos[0], pos[1]+1), 'down']]
         return neighbors
 
-    def get_pos_with_not_marked_neighbor(self):
-        visited_cells = self.visited.copy()
-        visited_cells.reverse()
-        for visited_cell in visited_cells:
-            result = self.get_non_visited_neighbors(visited_cell.get_pos())
-            if len(result) > 0:
-                return random.choices(result, k=1)[0][0]
-        return None
-
-    def get_pos_with_not_marked_neighbor_alt(self):
-        unused_visited_cells = self.visited.copy()
-        while True:
-            if len(unused_visited_cells) < 1:
-                break
-            visited_cell = random.choices(unused_visited_cells, k=1)[0]
-            result = self.get_non_visited_neighbors(visited_cell.get_pos())
-            if len(result) > 0:
-                return random.choices(result, k=1)[0][0]
-            else:
-                unused_visited_cells.remove(visited_cell)
-        return None
+    # get_pos_with_not_marked_neighbor -> durch stack ersetzt
+    # -> es ist wichtig, dass nicht gleich die nachbarn sondern das schon gesuchte Zelle 
+    # eingefügt wird!
 
     def draw(self):
         io.print_with_only_delay(f"{io.CLEAR_SCREEN(2)}{io.SET_POSITION(0, 0)}", 0, 0)
@@ -183,19 +166,20 @@ class Maze(object):
     def draw_with_pygame(self):
         import pygame
         pygame.init()
+        buffer = 20
         tile_size = 50
-        screen = pygame.display.set_mode((self.row_max*tile_size, self.col_max*tile_size))
+        screen = pygame.display.set_mode((self.row_max*tile_size+buffer*2, self.col_max*tile_size+buffer*2))
         pygame.display.set_caption("Maze Generation Test")
         clock = pygame.time.Clock()
 
-        r = pygame.Rect(self.start_pos[0]*tile_size+tile_size//4, self.start_pos[1]*tile_size+tile_size//4, tile_size-tile_size//2, tile_size-tile_size//2)
+        r = pygame.Rect(self.start_pos[0]*tile_size+tile_size//4+buffer, self.start_pos[1]*tile_size+tile_size//4+buffer, tile_size-tile_size//2, tile_size-tile_size//2)
         pygame.draw.rect(screen, (150, 250, 150), r)
 
         for row in range(self.row_max):
             for col in range(self.col_max):
                 cur_cell = self.map[(row, col)]
-                x = row*tile_size
-                y = col*tile_size
+                x = row*tile_size+buffer
+                y = col*tile_size+buffer
                 # grid
                 pygame.draw.line(screen, (50, 50, 50), [x, y], [x+tile_size, y])
                 pygame.draw.line(screen, (50, 50, 50), [x, y+tile_size], [x+tile_size, y+tile_size])
@@ -209,7 +193,7 @@ class Maze(object):
                 if cur_cell.left:
                     pygame.draw.line(screen, (255, 255, 255), [x, y], [x, y+tile_size])
                 if cur_cell.left:
-                    pygame.draw.line(screen, (255, 255, 0), [x+tile_size, y], [x+tile_size, y+tile_size])
+                    pygame.draw.line(screen, (255, 255, 255), [x+tile_size, y], [x+tile_size, y+tile_size])
         
         pygame.display.update()
         running = True
