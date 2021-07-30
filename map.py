@@ -5,12 +5,12 @@ import random
 import io_helper as io
 
 class Maze(object):
-    def __init__(self, level=0, debug=False):
+    def __init__(self, level=0, debug=False, col_max=10, row_max=10):
         self.level = level
         self.row_min = 0
-        self.row_max = 10    # [min, max) -> max not included
+        self.row_max = row_max    # [min, max) -> max not included
         self.col_min = 0
-        self.col_max = 10
+        self.col_max = col_max
         self.columns = self.col_max + level**2
         self.rows = self.row_max + level**2
         self.start_pos = (self.row_max//2, self.col_max//2)
@@ -134,12 +134,10 @@ class Maze(object):
     # -> es ist wichtig, dass nicht gleich die nachbarn sondern das schon gesuchte Zelle 
     # eingefügt wird!
 
-    def draw_with_pygame(self):
+    def draw_with_pygame(self, buffer=20, tile_size=50):
         import pygame
         pygame.init()
-        buffer = 20
-        tile_size = 50
-        screen = pygame.display.set_mode((self.row_max*tile_size+buffer*2, self.col_max*tile_size+buffer*2))
+        screen = pygame.display.set_mode((self.col_max*tile_size+buffer*2, self.row_max*tile_size+buffer*2))
         pygame.display.set_caption("Maze Generation Test")
         clock = pygame.time.Clock()
 
@@ -170,6 +168,7 @@ class Maze(object):
         running = True
         while running:
             clock.tick(10)
+            pygame.display.update()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -182,7 +181,7 @@ class Maze(object):
         pygame.init()
         buffer = 20
         tile_size = 50
-        screen = pygame.display.set_mode((self.row_max*tile_size+buffer*2, self.col_max*tile_size+buffer*2))
+        screen = pygame.display.set_mode((self.col_max*tile_size+buffer*2 ,self.row_max*tile_size+buffer*2))
         pygame.display.set_caption("Maze Generation Test")
         clock = pygame.time.Clock()
 
@@ -284,3 +283,9 @@ if __name__ == '__main__':
     maze.draw_with_pygame()
     #maze = Maze(debug=True)
     #maze.debug_draw_with_pygame()
+
+    maze_2 = Maze(col_max=30, row_max=10)
+    maze_2.draw_with_pygame()
+
+    maze_3 = Maze(col_max=100, row_max=70)
+    maze_3.draw_with_pygame(tile_size=10)
