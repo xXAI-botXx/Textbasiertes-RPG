@@ -14,3 +14,16 @@ class Item(abc.ABC):
     @abc.abstractmethod
     def use(self):
         pass
+
+    def set_map(self, maze):
+        self.maze = maze
+
+
+class Sword(Item):
+    def __init__(self, rarity_level):
+        super().__init__(self, "sword", True, False, rarity_level) 
+
+    def use(self):
+        pass
+        # checke vorderes Feld, ob dort Enemy ist
+        # wenn ja rufe damage func auf

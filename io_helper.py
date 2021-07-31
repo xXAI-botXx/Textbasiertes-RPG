@@ -161,6 +161,9 @@ def get_input(message="User: ") -> str:
             user_input += char
         except UnicodeDecodeError:
             return None
+        #except KeyError:
+        #    return None
+        
         if char == "\n" or char == "\r":
             print_char_with_only_delay("\n", 0, 0)
             break
