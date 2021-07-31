@@ -13,7 +13,8 @@ class Maze(object):
         self.col_max = col_max
         self.columns = self.col_max + level**2
         self.rows = self.row_max + level**2
-        self.start_pos = (self.row_max//2, self.col_max//2)
+        self.start_pos = (self.col_max//2, self.row_max//2)
+        self.player_pos = self.start_pos
         self.cur_pos = self.start_pos
         #self.start_pos = (0, 0)
         self.create_map()
@@ -22,6 +23,8 @@ class Maze(object):
             #self.debug_create_maze()
         else:
             self.create_maze(self.start_pos)
+            self.create_enemies()
+            self.create_items()
 
     def create_map(self) -> list:
         self.map = dict()
@@ -30,8 +33,8 @@ class Maze(object):
         # komplett mit Wänden befüllt:
         for row in range(self.row_max):
             for column in range(self.col_max):
-                pos = (row, column)
-                cur_cell = Cell(row, column)
+                pos = (column, row)
+                cur_cell = Cell(column, row)
                 self.map[pos] = cur_cell
                 self.not_marked += [cur_cell]
         
@@ -71,12 +74,10 @@ class Maze(object):
 
             neighbors = self.get_non_visited_neighbors(self.pos)
             if len(neighbors) < 1:
-                #other_neighbor = self.get_pos_with_not_marked_neighbor()
                 if len(self.stack) > 0:
                     self.pos = self.stack.pop(-1)
                 else:
                     print("###########################UPPS###########################")
-                    #break
             else:
                 if len(neighbors) > 1:
                     self.stack += [cur_cell.get_pos()]
@@ -90,49 +91,58 @@ class Maze(object):
         else:
             print("im finish")
 
+    def create_enemies(self):
+        pass
+
+    def create_items(self):
+        pass
+
     def reached_edge(self, pos) -> bool:
-        if pos[0]-1 < self.row_min:
+        if pos[1]-1 < self.row_min:
             return True
-        elif pos[0]+1 > self.row_max:
+        elif pos[1]+1 > self.row_max:
              return True
-        elif pos[1]-1 < self.col_min:
+        elif pos[0]-1 < self.col_min:
             return True
-        elif pos[1]+1 > self.col_max:
+        elif pos[0]+1 > self.col_max:
             return True  
         else:
             return False  
 
     def get_neighbors(self, pos):
         neighbors = []
-        if pos[0]-1 >= self.row_min:
-            neighbors += [(pos[0]-1, pos[1])]
-        if pos[0]+1 < self.row_max:
-             neighbors += [(pos[0]+1, pos[1])]
-        if pos[1]-1 >= self.col_min:
+        if pos[1]-1 >= self.row_min:
             neighbors += [(pos[0], pos[1]-1)]
-        if pos[1]+1 < self.col_max:
-            neighbors += [(pos[0], pos[1]+1)]
+        if pos[1]+1 < self.row_max:
+             neighbors += [(pos[0], pos[1]+1)]
+        if pos[0]-1 >= self.col_min:
+            neighbors += [(pos[0]-1, pos[1])]
+        if pos[0]+1 < self.col_max:
+            neighbors += [(pos[0]+1, pos[1])]
         return neighbors
 
     def get_non_visited_neighbors(self, pos):
         neighbors = []
-        if pos[0]-1 >= self.row_min:
-            if not self.map[(pos[0]-1, pos[1])].visited:
-                neighbors += [[(pos[0]-1, pos[1]), 'up']]
-        if pos[0]+1 < self.row_max:
-            if not self.map[(pos[0]+1, pos[1])].visited:
-                neighbors += [[(pos[0]+1, pos[1]), 'down']]
-        if pos[1]-1 >= self.col_min:
+        if pos[1]-1 >= self.row_min:
             if not self.map[(pos[0], pos[1]-1)].visited:
-                neighbors += [[(pos[0], pos[1]-1), 'left']]
-        if pos[1]+1 < self.col_max:
+                neighbors += [[(pos[0], pos[1]-1), 'up']]
+        if pos[1]+1 < self.row_max:
             if not self.map[(pos[0], pos[1]+1)].visited:
-                neighbors += [[(pos[0], pos[1]+1), 'right']]
+                neighbors += [[(pos[0], pos[1]+1), 'down']]
+        if pos[0]-1 >= self.col_min:
+            if not self.map[(pos[0]-1, pos[1])].visited:
+                neighbors += [[(pos[0]-1, pos[1]), 'left']]
+        if pos[0]+1 < self.col_max:
+            if not self.map[(pos[0]+1, pos[1])].visited:
+                neighbors += [[(pos[0]+1, pos[1]), 'right']]
         return neighbors
 
     # get_pos_with_not_marked_neighbor -> durch stack ersetzt
     # -> es ist wichtig, dass nicht gleich die nachbarn sondern das schon gesuchte Zelle 
     # eingefügt wird!
+
+    def update(self):
+        pass
 
     def draw_with_pygame(self, buffer=20, tile_size=50):
         import pygame
@@ -146,7 +156,7 @@ class Maze(object):
 
         for row in range(self.row_max):
             for col in range(self.col_max):
-                cur_cell = self.map[(row, col)]
+                cur_cell = self.map[(col, row)]
                 x = col*tile_size+buffer
                 y = row*tile_size+buffer
                 # grid
@@ -164,7 +174,6 @@ class Maze(object):
                 if cur_cell.right:
                     pygame.draw.line(screen, (255, 255, 255), [x+tile_size, y], [x+tile_size, y+tile_size])
         
-        pygame.display.update()
         running = True
         while running:
             clock.tick(10)
@@ -196,7 +205,7 @@ class Maze(object):
 
             for row in range(self.row_max):
                 for col in range(self.col_max):
-                    cur_cell = self.map[(row, col)]
+                    cur_cell = self.map[(col, row)]
                     x = col*tile_size+buffer
                     y = row*tile_size+buffer
                     # grid
@@ -218,6 +227,7 @@ class Maze(object):
             running_mall_round = True
             while running_mall_round:
                 clock.tick(10)
+                pygame.display.update()
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         running_mall_round = False
@@ -226,13 +236,48 @@ class Maze(object):
                         self.debug_create_maze()
                         running_mall_round = False
 
+    def info_pos(self, pos):
+        cur_cell = self.map[pos]
+        return {'left': cur_cell.left, 'right':cur_cell.right, 'up':cur_cell.up, 'down':cur_cell.down}
+
+    def get_player_pos(self) -> tuple:
+        return self.player_pos
+
+    def move_player(self, direction) -> str:
+        if direction == 'left':
+            if not self.map[self.player_pos].left:
+                self.player_pos = (self.player_pos[0]-1, self.player_pos[1])
+                return "Du bist den Weg weitergegangen."
+            else:
+                return "Eine Wand verhindert das Weitergehen."
+        elif direction == 'right':
+            if not self.map[self.player_pos].right:
+                self.player_pos = (self.player_pos[0]+1, self.player_pos[1])
+                return "Du bist den Weg weitergegangen."
+            else:
+                return "Eine Wand verhindert das Weitergehen."
+        elif direction == 'up':
+            if not self.map[self.player_pos].up:
+                self.player_pos = (self.player_pos[0], self.player_pos[1]-1)
+                return "Du bist den Weg weitergegangen."
+            else:
+                return "Eine Wand verhindert das Weitergehen."
+        elif direction == 'down':
+            if not self.map[self.player_pos].down:
+                self.player_pos = (self.player_pos[0], self.player_pos[1]+1)
+                return "Du bist den Weg weitergegangen."
+            else:
+                return "Eine Wand verhindert das Weitergehen."
+        else:
+            return "Es existiert keine solche Richtung."
+
     def update_pos(self, old_pos, new_pos):
         pass
 
 
 class Cell(object):
     # True = Wall
-    def __init__(self, row, column, visited=False, value=None, left=True, right=True, up=True, down=True):
+    def __init__(self, column, row, visited=False, value=None, left=True, right=True, up=True, down=True):
         self.row = row
         self.column = column
 
@@ -246,7 +291,7 @@ class Cell(object):
         self.down = down
 
     def get_pos(self) -> tuple:
-        return (self.row, self.column)
+        return (self.column, self.row)
 
     def get_value(self) -> any:
         return self.value

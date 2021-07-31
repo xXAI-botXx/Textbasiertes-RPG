@@ -17,7 +17,10 @@ DARKCYAN = '\033[36m'
 BLUE = '\033[94m'
 GREEN = '\033[92m'
 YELLOW = '\033[93m'
+MAGENTA = '\u001b[35m'
 RED = '\033[91m'
+WHITE = '\u001b[37m'
+BLACK = '\u001b[30m'
 
 # Background-Colors
 BACKGROUND_BLACK = "\u001b[40m"
@@ -163,6 +166,15 @@ def get_input(message="User: ") -> str:
             break
         print_char_with_only_delay(HEADER+char+END)
     return user_input.lower().replace("\r", "")
+
+def confirm(message="", cleanup=False, fast=False):
+    if fast:
+        print_with_only_delay(message, 0, 0)
+    else:
+        print_with_only_delay(message)
+    get_input("")
+    if cleanup:
+        print_with_only_delay(f"{CLEAR_SCREEN(2)}{SET_POSITION(0,0)}", 0, 0)
 
 def all_unicodes():
     for i in range(0,1100):

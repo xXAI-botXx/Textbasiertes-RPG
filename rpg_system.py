@@ -2,9 +2,9 @@ from enum import Enum
 import io_helper as io
 import time
 from player import Player
-from map import Labyrinth
+from map import Maze
 
-Game_State = Enum("Game_State", "STARTMENU INGAMEMENU INGAME SKILLTREE INVENTORY HISTORY")
+Game_State = Enum("Game_State", "STARTMENU INGAMEMENU INGAME SKILLTREE INVENTORY HISTORY EXIT")
 
 # using Hashing for fast decisions -> perfom better than if-statements
 class RPG_System(object):
@@ -13,16 +13,20 @@ class RPG_System(object):
         self.should_running = True
         self.startmenu_commands = {'neues spiel':self.new_game, 'lade spiel':self.load_game, 'informationen':self.get_informationen,
                                     'credits':self.credits, 'exit':self.exit}
-        self.ingamemenu_commands = dict()
         self.ingame_commands = dict()
 
     def run(self):
         while self.should_running:
             if self.state == Game_State.STARTMENU:
                 self.run_startmenu()
+            elif self.state == Game_State.INGAME:
+                self.run_ingame()
+            elif self.state == Game_State.EXIT:
+                break
         exit(0)
 
     def run_startmenu(self):
+        io.print_with_only_delay(f"{io.CLEAR_SCREEN(2)}{io.SET_POSITION(0,0)}", 0, 0)
         io.print_with_delay("Startmenü:\n    >> Neues Spiel <<\n    >> Lade Spiel <<\n    >> Informationen <<\n    >> Credits <<\n    >> Exit <<")
         while True:
             user_input = io.get_input()
@@ -45,11 +49,16 @@ class RPG_System(object):
         time.sleep(0.5)
         # init Game
         self.round = 0
-        io.print_with_delay("Labyrinth wird erschaffen...")
-        self.labyrinth = Labyrinth()
+        io.print_with_delay("Irrgarten wird erschaffen...")
+        self.maze = Maze()
         io.print_with_delay("Spieler wird erstellt...")
         self.player = Player()
+        self.player.set_maze(self.maze)
         self.state = Game_State.INGAME
+        io.print_with_only_delay(f"{io.CLEAR_SCREEN(2)}{io.SET_POSITION(0,0)}", 0, 0)
+        # FIXME -> text verbessern
+        io.print_with_delay("Du wachst plötzlich auf. Wo weist du nicht, aber eins ist klar: du musst hier weg...")
+        io.confirm(message=f"(drücke {io.BACKGROUND_RED}ENTER{io.END} zum Fortfahren)", fast=True)
         return "BREAK"
 
     def load_game(self):
@@ -58,7 +67,9 @@ class RPG_System(object):
 
     def get_informationen(self):
         io.print_with_only_delay(f"{io.UP(7)}Startmenü:\n    >> Neues Spiel <<\n    >> Lade Spiel <<\n    {io.REVERSED}>> Informationen <<{io.END}\n    >> Credits <<\n    >> Exit <<", 0, 0)
-        io.print_with_only_delay(f"{io.DOWN(1)}{io.CLEAR_LINE(2)}{io.SET_COLUMN(0)}", 0, 0)
+        info = ""
+        io.print_with_delay()
+        io.confirm(message=f"(drücke {io.BACKGROUND_RED}ENTER{io.END} um Fortzufahren)", cleanup=True, fast=True)
 
     def credits(self):
         io.print_with_only_delay(f"{io.UP(7)}Startmenü:\n    >> Neues Spiel <<\n    >> Lade Spiel <<\n    >> Informationen <<\n    {io.REVERSED}>> Credits <<{io.END}\n    >> Exit <<", 0, 0)
@@ -83,9 +94,8 @@ class RPG_System(object):
 
     def run_ingame(self):
         while True:
-            while True:
-                # Player action -> neue Runde, nur wenn wirklich eine Aktion
-                pass
+            self.player.turn()
+            self.maze.update()
 
     def save_game(self):
         pass
@@ -93,7 +103,7 @@ class RPG_System(object):
     def next_round(self):
         pass
 
-    def next_labyrinth_level(self):
+    def next_maze_level(self):
         pass
 
 
