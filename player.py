@@ -82,19 +82,21 @@ class Player(object):
 
     def go(self):
         result = self.maze.move_player(self.direction)
-        io.print_with_delay(result)
+        io.print_with_only_delay(result, 0, 0)
         io.confirm(message=f"(drücke {io.BACKGROUND_RED}ENTER{io.END} um Fortzufahren)", fast=True)
         return 1
 
     def rotate_right(self):
         self.direction = self.dirs[self.direction][1]
-        io.print_with_delay("Du drehst dich nach rechst.")
+        self.maze.check_exit(self.direction)
+        io.print_with_only_delay("Du drehst dich nach rechst.", 0, 0)
         io.confirm(message=f"(drücke {io.BACKGROUND_RED}ENTER{io.END} um Fortzufahren)", fast=True)
         return 0
 
     def rotate_left(self):
         self.direction = self.dirs[self.direction][0]
-        io.print_with_delay("Du drehst dich nach links.")
+        self.maze.check_exit(self.direction)
+        io.print_with_only_delay("Du drehst dich nach links.", 0, 0)
         io.confirm(message=f"(drücke {io.BACKGROUND_RED}ENTER{io.END} um Fortzufahren)", fast=True)
         return 0
 
@@ -128,4 +130,4 @@ class Player(object):
         pass
 
     def exit(self):
-        pass
+        return "exit"
