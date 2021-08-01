@@ -8,7 +8,8 @@ import player
 import item
 
 class Maze(object):
-    def __init__(self, debug=False, col_max=10, row_max=10):
+    def __init__(self, player, debug=False, col_max=10, row_max=10):
+        self.player = player
         self.row_min = 0
         self.row_max = row_max    # [min, max) -> max not included
         self.col_min = 0
@@ -95,14 +96,22 @@ class Maze(object):
 
     def create_enemies(self):
         self.enemies = []
-        for i in range(random.randint(len(self.map))):
-            if self.level == 0:
-                new_enemy = enemy.Demon()
-                self.enemies += [new_enemy]
-                new_enemy.set_map(self)
+        for i in range(random.randint(1, len(self.map.keys())//4)):
+            new_enemy = enemy.Demon((random.randint(0, self.col_max), random.randint(0, self.row_max)))
+            self.enemies += [new_enemy]
+            new_enemy.set_map(self)
 
     def create_items(self):
-        pass
+        i = item.Sword()
+        i.set_map(self)
+        self.player.add_inventory(i)
+
+        i = item.Exit()
+        i.set_map(self)
+        x,y = random.randint(0, self.col_max), random.randint(0, self.row_max)
+        while self.map[(x, y)].value != None:
+            x,y = random.randint(0, self.col_max), random.randint(0, self.row_max)
+        self.map[(x, y)].value = i
 
     def reached_edge(self, pos) -> bool:
         if pos[1]-1 < self.row_min:
@@ -244,6 +253,13 @@ class Maze(object):
                         self.debug_create_maze()
                         running_mall_round = False
 
+    def check_exit(self, direction):
+        next_cell = self.get_next_cell(self.player_pos, direction)
+        if next_cell != None:
+            if type(next_cell.value) == item.Exit:
+                next_cell.value.use()
+
+
     def info_pos(self, pos):
         cur_cell = self.map[pos]
         return {'left': cur_cell.left, 'right':cur_cell.right, 'up':cur_cell.up, 'down':cur_cell.down}
@@ -251,11 +267,55 @@ class Maze(object):
     def get_player_pos(self) -> tuple:
         return self.player_pos
 
-    def get_enemy_pos(self):
-        pass
+    def get_next_cell(self, pos, direction):
+        if direction == 'left' and not self.map[pos].left:
+            return self.map[(pos[0]-1, pos[1])]
+        elif direction == 'right' and not self.map[pos].right:
+            return self.map[(pos[0]+1, pos[1])]
+        elif direction == 'up' and not self.map[pos].up:
+            return self.map[(pos[0], pos[1]-1)]
+        elif direction == 'down' and not self.map[pos].down:
+            return self.map[(pos[0], pos[1]+1)]
 
-    def player_in_front(self, pos):
-        pass
+    def player_in_front(self, pos) -> bool:
+        cur_cell = self.map[pos]
+        next_cells = self.next_cells(cur_cell)
+        next_pos = None
+        for cell in next_cells:
+            if type(self.map[cell].value) == player.Player:
+                return True
+        return False
+
+    def enemy_in_front(self, direction):
+        cur_cell = self.map[self.player_pos]
+        if not cur_cell.get_direction(direction):
+            if direction == 'left':
+                next_cell = self.map[(self.player_pos[0]-1, self.player_pos[1])]
+                if type(next_cell.value) == enemy.Enemy:
+                    return True
+                else:
+                    return False
+            elif direction == 'right':
+                next_cell = self.map[(self.player_pos[0]+1, self.player_pos[1])]
+                if type(next_cell.value) == enemy.Enemy:
+                    return True
+                else:
+                    return False
+            elif direction == 'up':
+                next_cell = self.map[(self.player_pos[0], self.player_pos[1]-1)]
+                if type(next_cell.value) == enemy.Enemy:
+                    return True
+                else:
+                    return False
+            elif direction == 'up':
+                next_cell = self.map[(self.player_pos[0], self.player_pos[1]+1)]
+                if type(next_cell.value) == enemy.Enemy:
+                    return True
+                else:
+                    return False
+
+    def damage_player(self, damage):
+        self.player.damage(damage)
 
     def next_pos(self, enemy):
         cur_cell = self.map[enemy.pos]
@@ -285,26 +345,38 @@ class Maze(object):
     def move_player(self, direction) -> str:
         if direction == 'left':
             if not self.map[self.player_pos].left:
-                self.player_pos = (self.player_pos[0]-1, self.player_pos[1])
-                return "Du bist den Weg weitergegangen."
+                if not type(self.map[(self.player_pos[0]-1, self.player_pos[1])].value) == enemy.Enemy:
+                    self.player_pos = (self.player_pos[0]-1, self.player_pos[1])
+                    return "Du bist den Weg weitergegangen."
+                else:
+                   return f"Ein {self.map[(self.player_pos[0]-1, self.player_pos[1])].value.name} verhindert das Weitergehen." 
             else:
                 return "Eine Wand verhindert das Weitergehen."
         elif direction == 'right':
             if not self.map[self.player_pos].right:
-                self.player_pos = (self.player_pos[0]+1, self.player_pos[1])
-                return "Du bist den Weg weitergegangen."
+                if not type(self.map[(self.player_pos[0]+1, self.player_pos[1])].value) == enemy.Enemy:
+                    self.player_pos = (self.player_pos[0]+1, self.player_pos[1])
+                    return "Du bist den Weg weitergegangen."
+                else:
+                   return f"Ein {self.map[(self.player_pos[0]+1, self.player_pos[1])].value.name} verhindert das Weitergehen." 
             else:
                 return "Eine Wand verhindert das Weitergehen."
         elif direction == 'up':
             if not self.map[self.player_pos].up:
-                self.player_pos = (self.player_pos[0], self.player_pos[1]-1)
-                return "Du bist den Weg weitergegangen."
+                if not type(self.map[(self.player_pos[0], self.player_pos[1]-1)].value) == enemy.Enemy:
+                    self.player_pos = (self.player_pos[0], self.player_pos[1]-1)
+                    return "Du bist den Weg weitergegangen."
+                else:
+                   return f"Ein {self.map[(self.player_pos[0], self.player_pos[1]-1)].value.name} verhindert das Weitergehen." 
             else:
                 return "Eine Wand verhindert das Weitergehen."
         elif direction == 'down':
             if not self.map[self.player_pos].down:
-                self.player_pos = (self.player_pos[0], self.player_pos[1]+1)
-                return "Du bist den Weg weitergegangen."
+                if not type(self.map[(self.player_pos[0], self.player_pos[1]+1)].value) == enemy.Enemy:
+                    self.player_pos = (self.player_pos[0], self.player_pos[1]+1)
+                    return "Du bist den Weg weitergegangen."
+                else:
+                   return f"Ein {self.map[(self.player_pos[0], self.player_pos[1]+1)].value.name} verhindert das Weitergehen." 
             else:
                 return "Eine Wand verhindert das Weitergehen."
         else:
@@ -336,6 +408,16 @@ class Cell(object):
     def get_value(self) -> any:
         return self.value
 
+    def get_direction(self, dir) -> bool:
+        if dir == 'left':
+            return self.left
+        elif dir == 'right':
+            return self.right
+        elif dir == 'up':
+            return self.up
+        elif dir == 'down':
+            return self.down
+
     def update_value(self, new_value):
         self.value = new_value
 
@@ -364,13 +446,13 @@ class Cell(object):
 
 # testing
 if __name__ == '__main__':
-    maze = Maze()
+    maze = Maze(player.Player())
     maze.draw_with_pygame()
     #maze = Maze(debug=True)
     #maze.debug_draw_with_pygame()
 
-    maze_2 = Maze(col_max=30, row_max=10)
+    maze_2 = Maze(player.Player(), col_max=30, row_max=10)
     maze_2.draw_with_pygame()
 
-    maze_3 = Maze(col_max=100, row_max=70)
+    maze_3 = Maze(player.Player(), col_max=100, row_max=70)
     maze_3.draw_with_pygame(tile_size=10)

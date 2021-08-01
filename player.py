@@ -6,22 +6,19 @@ class Player(object):
 
     #SKILLS = [['Feuerball'], []]
 
-    def __init__(self, health=10, stamina=10, magic=10, skills=[], skill_tree=[0, 0, 0, 0], skill_points=0, inventory=[], equipment=[]):
+    def __init__(self, health=10, shield=5, stamina=10, magic=10, level=0, inventory=[]):
         self.health = health
+        self.shield = shield
         self.stamina = stamina
         self.magic = magic
-        self.skills = skills
-        self.skill_tree = skill_tree
-        self.skill_points = skill_points
         self.inventory = inventory
-        self.equipment = equipment
         self.first_time = True
 
         self.direction = random.choice(['right', 'left', 'up', 'down'])
         self.dirs = {'up':('left', 'right', 'down'), 'down':('right', 'left', 'up'), 'right':('up', 'down', 'left'), 'left':('down', 'up', 'right')}
 
         self.move_commands = {'laufen':self.go, 'rechts drehen':self.rotate_right, 'links drehen':self.rotate_left, 'inventar':self.open_inventory, 
-                              'angriff':self.attack, 'verteidigen':self.defend, 'ausrüstung':self.open_equipment, 'magie':self.open_magic}
+                               'exit':self.exit}
 
     def set_maze(self, maze):
         self.maze = maze
@@ -30,19 +27,26 @@ class Player(object):
         # solange bis Spieler Zug mit Bewegungskosten tätigt
         while True:
             io.print_with_only_delay(f"{io.CLEAR_SCREEN(2)}{io.SET_POSITION(0, 0)}", 0, 0)
+            self.maze.check_exit(self.direction)
             if self.first_time:
+                self.first_time = False
                 # Adding random extras -> ein kühler Luftzug ist zu spüren, irgendetwas ist zu hören,...
                 io.print_with_delay(self.look())    # auch bei look könnte es randome xtras geben
-                io.print_with_delay("-> laufen\n-> rechts drehen\n-> links drehen\n-> inventar\n-> angriff\n-> verteidigen\n-> magie")
+                io.print_with_delay("-> laufen\n-> rechts drehen\n-> links drehen\n-> inventar\n-> exit")
                 user_input = io.get_input("\nWas willst du tun: ")
             else:
                 io.print_with_only_delay(self.look(), 0, 0)
-                io.print_with_only_delay("\n-> laufen\n-> rechts drehen\n-> links drehen\n-> inventar\n-> angriff\n-> verteidigen\n-> magie", 0, 0)
+                io.print_with_only_delay("\n-> laufen\n-> rechts drehen\n-> links drehen\n-> inventar\n-> exit", 0, 0)
                 user_input = io.get_input("\n\nWas willst du tun: ")
-            result = self.move_commands[user_input]()
-            if result == 1:
+            try:
+                result = self.move_commands[user_input]()
+            except KeyError:
+                io.confirm("Diesen key gibt es nicht!", fast=True)
+                continue
+            if result == 'exit':
+                return 'EXIT'
+            elif result == 1:
                 break
-        self.first_time = False
 
     def look(self) -> str:
             # links davon, rechts davon, gegenüber davon
@@ -51,7 +55,10 @@ class Player(object):
         if result[self.direction] == True:
             message += f"{io.GREEN}Vor{io.END} dir ragt eine hohe Mauer empor.\n"
         else:
-            message += f"{io.GREEN}Vor{io.END} dir liegt ein schmaler Weg.\n"
+            if self.maze.enemy_in_front(self.direction):
+                message += f"Ein Monster tut sich {io.GREEN}vor{io.END} dir auf!"
+            else:
+                message += f"{io.GREEN}Vor{io.END} dir liegt ein schmaler Weg.\n"
 
         left = self.dirs[self.direction][0]
         if result[left] == True:
@@ -92,22 +99,33 @@ class Player(object):
         return 0
 
     def open_inventory(self):
+        while True:
+            io.print_with_only_delay(f"{io.CLEAR_SCREEN(2)}{io.SET_POSITION(0,0)}Inventar:\n\n", 0, 0)
+            for i, item in enumerate(self.inventory):
+                io.print_with_only_delay(f"    {i}. {item.name}\n", 0, 0)
+            io.print_with_only_delay(f"\n(gibt 'benutze'+*leerzeichen*+'Item-id' ein, um das Item zu verwenden.)", 0, 0)
+            user_input = io.get_input("\nWas willst du tun: ")
+            if user_input == 'exit' or user_input == 'weiter':
+                break
+            elif user_input.split(" ")[0] == 'benutze':
+                try:
+                    self.inventory[int(user_input.split(" ")[1])].use(self.direction)
+                    return 1
+                except IndexError:
+                    pass
         return 0
 
-    def attack(self):
-        # Angriff mit der primären Waffe -> Das ist standard, weitere Angriffe sind im Inventarmenü und im magiemenü verfügbar
-        return 1
+    def damage(self, damage:int):
+        damage -= self.shield
+        self.shield = max(0, self.shield-damage)
+        if damage > 0:
+            self.health -= damage
 
-    def defend(self):
-        # Verteidigung mit Schild oder nichts
-        return 1
-
-    def open_magic(self):
-        # wie erhält man Spells? -> durch Items -> Bücher oder durch Skillsystem? -> später klären
-        return 0
+    def add_inventory(self, item):
+        self.inventory += [item]
 
     def level_up(self):
         pass
 
-    def skill_tree(self):
+    def exit(self):
         pass

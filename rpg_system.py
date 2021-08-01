@@ -27,7 +27,7 @@ class RPG_System(object):
 
     def run_startmenu(self):
         io.print_with_only_delay(f"{io.CLEAR_SCREEN(2)}{io.SET_POSITION(0,0)}", 0, 0)
-        io.print_with_delay("Startmenü:\n    >> Starten <<\n   >> Informationen <<\n    >> Credits <<\n    >> Exit <<")
+        io.print_with_delay("Startmenü:\n    >> Starten <<\n    >> Informationen <<\n    >> Credits <<\n    >> Exit <<")
         while True:
             user_input = io.get_input()
             if user_input != None:
@@ -43,16 +43,17 @@ class RPG_System(object):
                     io.print_with_only_delay(f"{io.UP(1)}{io.CLEAR_LINE(2)}{io.UP(1)}{io.CLEAR_LINE(2)}{io.SET_COLUMN(0)}", 0, 0)
 
     def new_game(self):
-        io.print_with_only_delay(f"{io.UP(7)}Startmenü:\n    {io.REVERSED}>> Starten <<{io.END}\n    >> Informationen <<\n    >> Credits <<\n    >> Exit <<", 0, 0)
+        io.print_with_only_delay(f"{io.CLEAR_SCREEN(2)}{io.SET_POSITION(0,0)}", 0, 0)
+        io.print_with_only_delay(f"Startmenü:\n    {io.REVERSED}>> Starten <<{io.END}\n    >> Informationen <<\n    >> Credits <<\n    >> Exit <<", 0, 0)
         io.print_with_only_delay(io.DOWN(1) + io.CLEAR_LINE(2) + io.LEFT(100))
         io.print_with_delay("Lade neues Spiel...")
         time.sleep(0.5)
         # init Game
         self.round = 0
-        io.print_with_delay("Irrgarten wird erschaffen...")
-        self.maze = Maze()
         io.print_with_delay("Spieler wird erstellt...")
         self.player = Player()
+        io.print_with_delay("Irrgarten wird erschaffen...")
+        self.maze = Maze(self.player)
         self.player.set_maze(self.maze)
         self.state = Game_State.INGAME
         io.print_with_only_delay(f"{io.CLEAR_SCREEN(2)}{io.SET_POSITION(0,0)}", 0, 0)
@@ -63,13 +64,16 @@ class RPG_System(object):
 
     def get_informationen(self):
         io.print_with_only_delay(f"{io.UP(7)}Startmenü:\n    >> Starten <<\n    {io.REVERSED}>> Informationen <<{io.END}\n    >> Credits <<\n    >> Exit <<", 0, 0)
-        info = ""
-        io.print_with_delay()
+        info = "\n\nIn diesem textbasiertem Spiel musst du dich einem Irrgarten, gefüllt mit Gegnern stellen. Du hast gewonnen, wenn du den Ausgang gefunden hast."
+        io.print_with_delay(info)
         io.confirm(message=f"(drücke {io.BACKGROUND_RED}ENTER{io.END} um Fortzufahren)", cleanup=True, fast=True)
+        io.print_with_only_delay("Startmenü:\n    >> Starten <<\n    >> Informationen <<\n    >> Credits <<\n    >> Exit <<\n", 0, 0)
 
     def credits(self):
         io.print_with_only_delay(f"{io.UP(7)}Startmenü:\n    >> Starten <<\n    >> Informationen <<\n    {io.REVERSED}>> Credits <<{io.END}\n    >> Exit <<", 0, 0)
-        io.print_with_only_delay(f"{io.DOWN(1)}{io.CLEAR_LINE(2)}{io.SET_COLUMN(0)}", 0, 0)
+        io.print_with_delay("\n\nAll: Tobia Ippolito")
+        io.confirm(message=f"(drücke {io.BACKGROUND_RED}ENTER{io.END} um Fortzufahren)", cleanup=True, fast=True)
+        io.print_with_only_delay("Startmenü:\n    >> Starten <<\n    >> Informationen <<\n    >> Credits <<\n    >> Exit <<\n", 0, 0)
 
     def exit(self):
         io.print_with_only_delay(f"{io.UP(7)}Startmenü:\n    >> Starten <<\n    >> Informationen <<\n    >> Credits <<\n    {io.REVERSED}>> Exit <<{io.END}", 0, 0)
@@ -90,7 +94,22 @@ class RPG_System(object):
 
     def run_ingame(self):
         while True:
-            self.player.turn()
+            result = self.player.turn()
+            if result == 'EXIT':
+                while True:
+                    result = io.get_input("Bist du dir sicher? (y/n) ")
+                    if result == "n":
+                        really = False
+                        break
+                    elif result == "y":
+                        really = True
+                        break
+                    else:
+                        io.print_char_with_only_delay(f"{io.UP(1)}{io.CLEAR_LINE(2)}{io.SET_COLUMN(0)}", 0, 0)
+                if really:
+                    io.print_with_delay("System offline...")
+                    time.sleep(0.5)
+                    exit(0)
             self.maze.update()
 
 

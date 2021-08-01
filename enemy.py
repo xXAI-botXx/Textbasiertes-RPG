@@ -34,7 +34,7 @@ class Demon(Enemy):
     def __init__(self, pos):
         attack_pool = {'default':self.attack, 'scratch':self.scratch}
         health = random.randint(5, 15)
-        super().__init__(self, 'Demon', health, attack_pool, pos)
+        super().__init__('Demon', health, attack_pool, pos)
 
     def turn(self):
         if self.alive:

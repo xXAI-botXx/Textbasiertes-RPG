@@ -167,6 +167,9 @@ def get_input(message="User: ") -> str:
         if char == "\n" or char == "\r":
             print_char_with_only_delay("\n", 0, 0)
             break
+        elif char == '\u0008' or char == '\b':
+            print_with_only_delay(f"{LEFT(1)} ", 0 ,0)
+            user_input = user_input[:-2]
         print_char_with_only_delay(HEADER+char+END)
     return user_input.lower().replace("\r", "")
 
