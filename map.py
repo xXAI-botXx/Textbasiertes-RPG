@@ -3,16 +3,18 @@
 
 import random
 import io_helper as io
+import enemy
+import player
+import item
 
 class Maze(object):
-    def __init__(self, level=0, debug=False, col_max=10, row_max=10):
-        self.level = level
+    def __init__(self, debug=False, col_max=10, row_max=10):
         self.row_min = 0
         self.row_max = row_max    # [min, max) -> max not included
         self.col_min = 0
         self.col_max = col_max
-        self.columns = self.col_max + level**2
-        self.rows = self.row_max + level**2
+        self.columns = self.col_max
+        self.rows = self.row_max
         self.start_pos = (self.col_max//2, self.row_max//2)
         self.player_pos = self.start_pos
         self.cur_pos = self.start_pos
@@ -92,7 +94,12 @@ class Maze(object):
             print("im finish")
 
     def create_enemies(self):
-        pass
+        self.enemies = []
+        for i in range(random.randint(len(self.map))):
+            if self.level == 0:
+                new_enemy = enemy.Demon()
+                self.enemies += [new_enemy]
+                new_enemy.set_map(self)
 
     def create_items(self):
         pass
@@ -142,7 +149,8 @@ class Maze(object):
     # eingefügt wird!
 
     def update(self):
-        pass
+        for enemy in self.enemies:
+            enemy.turn()
 
     def draw_with_pygame(self, buffer=20, tile_size=50):
         import pygame
@@ -243,6 +251,37 @@ class Maze(object):
     def get_player_pos(self) -> tuple:
         return self.player_pos
 
+    def get_enemy_pos(self):
+        pass
+
+    def player_in_front(self, pos):
+        pass
+
+    def next_pos(self, enemy):
+        cur_cell = self.map[enemy.pos]
+        next_cells = self.next_cells(cur_cell)
+        next_pos = None
+        for cell in next_cells:
+            if type(self.map[cell].value) != enemy.Enemy and type(self.map[cell].value) != player.Player:
+                next_pos = cell
+                break
+        if next_pos != None:
+            cur_cell.value = None
+            self.map[next_pos].value = enemy
+            enemy.set_pos(next_pos)
+
+    def next_cells(self, cell):
+        next_cells = []
+        if not cell.left:
+            next_cells += [(cell.column-1, cell.row)]
+        if not cell.right:
+            next_cells += [(cell.column+1, cell.row)]
+        if not cell.up:
+            next_cells += [(cell.column, cell.row-1)]
+        if not cell.down:
+            next_cells += [(cell.column, cell.row+1)]
+        return next_cells
+
     def move_player(self, direction) -> str:
         if direction == 'left':
             if not self.map[self.player_pos].left:
@@ -277,13 +316,14 @@ class Maze(object):
 
 class Cell(object):
     # True = Wall
-    def __init__(self, column, row, visited=False, value=None, left=True, right=True, up=True, down=True):
+    def __init__(self, column, row, visited=False, value=None, item=None, left=True, right=True, up=True, down=True):
         self.row = row
         self.column = column
 
         self.visited = visited    # for labyrinth creation
 
         self.value = value
+        self.item = item
 
         self.left = left
         self.right = right
