@@ -49,7 +49,7 @@ class Player(object):
                 break
 
     def look(self) -> str:
-            # links davon, rechts davon, gegenüber davon
+            # links davon, rechts davon, hinter
         message = ""
         result = self.maze.info_pos(self.maze.get_player_pos())
         if result[self.direction] == True:
@@ -74,9 +74,9 @@ class Player(object):
 
         opposite = self.dirs[self.direction][2]
         if result[opposite] == True:
-            message += f"{io.YELLOW}Gegenüber{io.END} von dir ragt eine hohe Mauer empor.\n"
+            message += f"{io.YELLOW}Hinter{io.END} dir ragt eine hohe Mauer empor.\n"
         else:
-            message += f"{io.YELLOW}Gegenüber{io.END} von dir liegt ein schmaler Weg.\n"
+            message += f"{io.YELLOW}Hinter{io.END} dir liegt ein schmaler Weg.\n"
 
         return message
 

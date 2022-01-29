@@ -165,7 +165,7 @@ class Maze(object):
         import pygame
         pygame.init()
         screen = pygame.display.set_mode((self.col_max*tile_size+buffer*2, self.row_max*tile_size+buffer*2))
-        pygame.display.set_caption("Maze Generation Test")
+        pygame.display.set_caption("Karte mit aktueller Spielerposition")
         clock = pygame.time.Clock()
 
         r = pygame.Rect(self.player_pos[0]*tile_size+tile_size//4+buffer, self.player_pos[1]*tile_size+tile_size//4+buffer, tile_size-tile_size//2, tile_size-tile_size//2)
