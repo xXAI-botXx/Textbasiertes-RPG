@@ -29,8 +29,8 @@ Somit kann er grob einschätzen wo er sich befindet.<br>
 <br>
 Der Text im Spiel soll sich analog anfühlen (wie eine sehr alte Tastatur aus den 2000ern) und deswegen werden die Buchstaben einzelnt mit Sound ausgegeben (die Geschwindigkeit eines Buchstaben und der Sound werden zufallsgeneriert ausgegeben).<br>
 Folgendes Beispiel soll dies zeigen:<br>
-<video width="320" height="240" controls>
-  <source src="startmenu_show.mp4" type="video/mp4">
+<video controls>
+  <source src="img/startmenu_show.mp4" type="video/mp4">
 </video> 
 
 ---
