@@ -168,7 +168,7 @@ class Maze(object):
         pygame.display.set_caption("Maze Generation Test")
         clock = pygame.time.Clock()
 
-        r = pygame.Rect(self.start_pos[1]*tile_size+tile_size//4+buffer, self.start_pos[0]*tile_size+tile_size//4+buffer, tile_size-tile_size//2, tile_size-tile_size//2)
+        r = pygame.Rect(self.player_pos[0]*tile_size+tile_size//4+buffer, self.player_pos[1]*tile_size+tile_size//4+buffer, tile_size-tile_size//2, tile_size-tile_size//2)
         pygame.draw.rect(screen, (150, 250, 150), r)
 
         for row in range(self.row_max):
@@ -198,6 +198,8 @@ class Maze(object):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                    pygame.display.quit()
+                    pygame.quit()
 
     def debug_draw_with_pygame(self):
         if not self.debug:

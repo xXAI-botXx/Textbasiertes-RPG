@@ -18,7 +18,7 @@ class Player(object):
         self.dirs = {'up':('left', 'right', 'down'), 'down':('right', 'left', 'up'), 'right':('up', 'down', 'left'), 'left':('down', 'up', 'right')}
 
         self.move_commands = {'laufen':self.go, 'rechts drehen':self.rotate_right, 'links drehen':self.rotate_left, 'inventar':self.open_inventory, 
-                               'exit':self.exit}
+                               'exit':self.exit, 'show':self.show, 'maze':self.show, 'karte':self.show, 'map':self.show}
 
     def set_maze(self, maze):
         self.maze = maze
@@ -32,11 +32,11 @@ class Player(object):
                 self.first_time = False
                 # Adding random extras -> ein kühler Luftzug ist zu spüren, irgendetwas ist zu hören,...
                 io.print_with_delay(self.look())    # auch bei look könnte es randome xtras geben
-                io.print_with_delay("-> laufen\n-> rechts drehen\n-> links drehen\n-> inventar\n-> exit")
+                io.print_with_delay("-> laufen\n-> rechts drehen\n-> links drehen\n-> inventar\n-> karte\n-> exit")
                 user_input = io.get_input("\nWas willst du tun: ")
             else:
                 io.print_with_only_delay(self.look(), 0, 0)
-                io.print_with_only_delay("\n-> laufen\n-> rechts drehen\n-> links drehen\n-> inventar\n-> exit", 0, 0)
+                io.print_with_only_delay("\n-> laufen\n-> rechts drehen\n-> links drehen\n-> inventar\n-> karte\n-> exit", 0, 0)
                 user_input = io.get_input("\n\nWas willst du tun: ")
             try:
                 result = self.move_commands[user_input]()
@@ -131,3 +131,6 @@ class Player(object):
 
     def exit(self):
         return "exit"
+
+    def show(self):
+        self.maze.draw_with_pygame()    #tile_size=10
